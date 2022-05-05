@@ -22,7 +22,7 @@
         button.addEventListener("click", () => {
             const bodyObject = {
                 soundUrl: url.value,
-                forceAudioOnly: audioOnly.value === "on"
+                forceAudioOnly: audioOnly.checked
             }
 
             fetch("/addQueue", {
