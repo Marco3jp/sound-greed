@@ -47,7 +47,6 @@ func htmlHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func addQueueHandler(w http.ResponseWriter, r *http.Request) {
-
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Printf("error read all: %v", err)
@@ -62,8 +61,11 @@ func addQueueHandler(w http.ResponseWriter, r *http.Request) {
 	operationQueue = append(operationQueue, requestBody)
 
 	if !isOperationRunning {
-		tryQueuePopAndDownload()
+		go tryQueuePopAndDownload()
 	}
+
+	// TODO: Queueの状態を返せるといいかも？
+	//  と思ったけどQueueを返すエンドポイントくらいあっていいのでは
 }
 
 func tryQueuePopAndDownload() {
