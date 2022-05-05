@@ -19,6 +19,7 @@ type configType struct {
 	OutDir              string `json:"outDir"`
 	ConvertAudioFormat  string `json:"convertAudioFormat"`
 	ConvertAudioQuality string `json:"convertAudioQuality"`
+	ConvertVideoFormat  string `json:"convertVideoFormat"`
 }
 
 type addQueueBody struct {
@@ -104,6 +105,11 @@ func downloadTarget(input addQueueBody) {
 			parsedConfig.ConvertAudioQuality,
 		)
 	}
+	args = append(
+		args,
+		"--recode-video",
+		parsedConfig.ConvertVideoFormat,
+	)
 	args = append(args, input.SoundUrl)
 
 	cmd := exec.Command("yt-dlp", args...)

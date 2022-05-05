@@ -1,5 +1,6 @@
 {
   "outDir": ".",
   "convertAudioFormat": "mp3",
-  "convertAudioQuality": "320K"
+  "convertAudioQuality": "320K",
+  "convertVideoFormat": "mp4"
 }
