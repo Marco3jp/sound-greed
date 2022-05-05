@@ -33,7 +33,7 @@ func main() {
 func htmlHandler(w http.ResponseWriter, _ *http.Request) {
 	_, err := fmt.Fprintf(w, html)
 	if err != nil {
-		panic(err)
+		fmt.Printf("error htmlHandler: %v", err)
 	}
 }
 
