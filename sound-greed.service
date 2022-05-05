@@ -1,0 +1,8 @@
+[Unit]
+Description=sound greed service
+
+[Service]
+ExecStart=/path/to/bin/sound-greed
+
+[Install]
+WantedBy=default.target
