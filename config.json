@@ -1,3 +1,5 @@
 {
-  "outDir": "."
+  "outDir": ".",
+  "convertAudioFormat": "mp3",
+  "convertAudioQuality": "320K"
 }

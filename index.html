@@ -9,18 +9,20 @@
 <div>
     <form>
         <label>URL: <input type="url" id="url"></label>
+        <label><input type="checkbox" id="audio-only">Audio Only</label>
         <button type="button" id="button">Add Queue</button>
     </form>
 </div>
 
 <script>
     const url = document.querySelector("#url")
+    const audioOnly = document.querySelector("#audio-only")
     const button = document.querySelector("#button")
-    if (button && url) {
+    if (url && audioOnly && button) {
         button.addEventListener("click", () => {
             const bodyObject = {
                 soundUrl: url.value,
-                isForceSound: false // TODO
+                forceAudioOnly: audioOnly.value === "on"
             }
 
             fetch("/addQueue", {

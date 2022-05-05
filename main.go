@@ -16,12 +16,14 @@ var html string
 var config string
 
 type configType struct {
-	OutDir string `json:"outDir"`
+	OutDir              string `json:"outDir"`
+	ConvertAudioFormat  string `json:"convertAudioFormat"`
+	ConvertAudioQuality string `json:"convertAudioQuality"`
 }
 
 type addQueueBody struct {
-	SoundUrl     string `json:"soundUrl"`
-	IsForceSound bool   `json:"isForceSound"`
+	SoundUrl       string `json:"soundUrl"`
+	ForceAudioOnly bool   `json:"forceAudioOnly"`
 }
 
 var operationQueue []addQueueBody
@@ -84,13 +86,27 @@ func tryQueuePopAndDownload() {
 func downloadTarget(input addQueueBody) {
 	// yt-dlp default template
 	fileNameTemplate := "%(title)s [%(id)s].%(ext)s"
-
 	fileOutputArg := parsedConfig.OutDir + "/" + fileNameTemplate
 
-	cmd := exec.Command(
-		"yt-dlp",
-		"-o", fileOutputArg,
-		input.SoundUrl)
+	var args []string
+
+	args = append(args, "-o", fileOutputArg)
+	if input.ForceAudioOnly {
+		args = append(args, "-x")
+		args = append(
+			args,
+			"--audio-format",
+			parsedConfig.ConvertAudioFormat,
+		)
+		args = append(
+			args,
+			"--audio-quality",
+			parsedConfig.ConvertAudioQuality,
+		)
+	}
+	args = append(args, input.SoundUrl)
+
+	cmd := exec.Command("yt-dlp", args...)
 	err := cmd.Run()
 
 	if err != nil {
