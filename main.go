@@ -12,6 +12,13 @@ import _ "embed"
 //go:embed index.html
 var html string
 
+//go:embed config.json
+var config string
+
+type configType struct {
+	OutDir string `json:"outDir"`
+}
+
 type addQueueBody struct {
 	SoundUrl     string `json:"soundUrl"`
 	IsForceSound bool   `json:"isForceSound"`
@@ -19,8 +26,10 @@ type addQueueBody struct {
 
 var operationQueue []addQueueBody
 var isOperationRunning bool = false
+var parsedConfig configType
 
 func main() {
+	parseConfig()
 	http.HandleFunc("/", htmlHandler)
 	http.HandleFunc("/addQueue", addQueueHandler)
 
@@ -71,7 +80,15 @@ func tryQueuePopAndDownload() {
 }
 
 func downloadTarget(input addQueueBody) {
-	cmd := exec.Command("yt-dlp", input.SoundUrl)
+	// yt-dlp default template
+	fileNameTemplate := "%(title)s [%(id)s].%(ext)s"
+
+	fileOutputArg := parsedConfig.OutDir + "/" + fileNameTemplate
+
+	cmd := exec.Command(
+		"yt-dlp",
+		"-o", fileOutputArg,
+		input.SoundUrl)
 	err := cmd.Run()
 
 	if err != nil {
@@ -79,4 +96,11 @@ func downloadTarget(input addQueueBody) {
 	}
 
 	fmt.Printf("finished download target")
+}
+
+func parseConfig() {
+	err := json.Unmarshal([]byte(config), &parsedConfig)
+	if err != nil {
+		panic(err)
+	}
 }
