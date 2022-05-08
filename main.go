@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os/exec"
+	"strings"
 )
 import _ "embed"
 
@@ -105,11 +106,17 @@ func downloadTarget(input addQueueBody) {
 			parsedConfig.ConvertAudioQuality,
 		)
 	}
-	args = append(
-		args,
-		"--recode-video",
-		parsedConfig.ConvertVideoFormat,
-	)
+
+	// TODO: 直近はこれで問題なさそうではあるけど暫定対応で、もし他のサイトで音声取ってきたくなったら書き直す必要が出てきてしまう
+	//   代替案として、mp3>mp3/mp4というフォーマットを設定に書くことで、mp3の場合にmp4に詰め直すような処理を回避させることは可能かもしれない
+	//   とはいえ実際に存在しうる音声ファイルのフォーマットを網羅するのは非現実的でもあるので悩ましい
+	if !strings.Contains(input.SoundUrl, "soundcloud.com") {
+		args = append(
+			args,
+			"--recode-video",
+			parsedConfig.ConvertVideoFormat,
+		)
+	}
 	args = append(args, input.SoundUrl)
 
 	cmd := exec.Command("yt-dlp", args...)
