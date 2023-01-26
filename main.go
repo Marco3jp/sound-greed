@@ -87,7 +87,7 @@ func tryQueuePopAndDownload() {
 
 func downloadTarget(input addQueueBody) {
 	// yt-dlp default template
-	fileNameTemplate := "%(title)s [%(id)s].%(ext)s"
+	fileNameTemplate := "%(title).50s [%(id)s].%(ext)s"
 	fileOutputArg := parsedConfig.OutDir + "/" + fileNameTemplate
 
 	var args []string
