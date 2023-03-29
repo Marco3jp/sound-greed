@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 import _ "embed"
 
@@ -86,9 +88,18 @@ func tryQueuePopAndDownload() {
 }
 
 func downloadTarget(input addQueueBody) {
+	today := time.Now()
+	todayString := today.Format("2006-01-02")
+	outDir := parsedConfig.OutDir + "/" + todayString
+
+	err := os.Mkdir(outDir, os.ModePerm)
+	if err != nil {
+		return
+	}
+
 	// yt-dlp default template
 	fileNameTemplate := "%(title).50s [%(id)s].%(ext)s"
-	fileOutputArg := parsedConfig.OutDir + "/" + fileNameTemplate
+	fileOutputArg := outDir + "/" + fileNameTemplate
 
 	var args []string
 
@@ -120,7 +131,7 @@ func downloadTarget(input addQueueBody) {
 	args = append(args, input.SoundUrl)
 
 	cmd := exec.Command("yt-dlp", args...)
-	err := cmd.Run()
+	err = cmd.Run()
 
 	if err != nil {
 		fmt.Printf("error download: %v", err)
