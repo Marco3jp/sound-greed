@@ -48,20 +48,20 @@ func main() {
 func htmlHandler(w http.ResponseWriter, _ *http.Request) {
 	_, err := fmt.Fprintf(w, html)
 	if err != nil {
-		fmt.Printf("error htmlHandler: %v", err)
+		fmt.Printf("error htmlHandler: %v\n", err)
 	}
 }
 
 func addQueueHandler(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Printf("error read all: %v", err)
+		fmt.Printf("error read all: %v\n", err)
 	}
 
 	var requestBody addQueueBody
 	err = json.Unmarshal(bodyBytes, &requestBody)
 	if err != nil {
-		fmt.Printf("error json unmarshal: %v", err)
+		fmt.Printf("error json unmarshal: %v\n", err)
 	}
 
 	operationQueue = append(operationQueue, requestBody)
@@ -134,10 +134,10 @@ func downloadTarget(input addQueueBody) {
 	err = cmd.Run()
 
 	if err != nil {
-		fmt.Printf("error download: %v", err)
+		fmt.Printf("error download: %v\n", err)
 	}
 
-	fmt.Printf("finished download target")
+	fmt.Printf("finished download target\n")
 }
 
 func parseConfig() {
