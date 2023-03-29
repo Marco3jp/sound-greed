@@ -136,6 +136,7 @@ func downloadTarget(input addQueueBody) {
 
 	if err != nil {
 		fmt.Printf("error download: %v\n", err)
+		return
 	}
 
 	fmt.Printf("finished download target\n")
