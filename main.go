@@ -92,8 +92,9 @@ func downloadTarget(input addQueueBody) {
 	todayString := today.Format("2006-01-02")
 	outDir := parsedConfig.OutDir + "/" + todayString
 
-	err := os.Mkdir(outDir, os.ModePerm)
+	err := os.MkdirAll(outDir, os.ModePerm)
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		return
 	}
 
