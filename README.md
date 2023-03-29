@@ -12,7 +12,7 @@
 - sound-greed.serviceを使うといい感じにsystemdに任せられます
   - アプリケーションのほうは設定書いてビルドする
     - 普通に実行させて動作確認するのあり（特に保存先とか意図通りに動くか）
-  - `ln -s /home/marco/dev/sound-greed/main ~/bin/sound-greed` する
+  - `ln -s /path/to/sound-greed/main ~/bin/sound-greed` する（しなくてもいいけど）
   - sound-greed.serviceのExecStartを調整
   - `/home/username/.config/systemd/user/sound-greed.service` に移動
     - ここに置くとユーザースコープで扱える
