@@ -19,19 +19,24 @@
     const audioOnly = document.querySelector("#audio-only")
     const button = document.querySelector("#button")
     if (url && audioOnly && button) {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", async () => {
+            button.disabled = true;
+
             const bodyObject = {
                 soundUrl: url.value,
                 forceAudioOnly: audioOnly.checked
             }
 
-            fetch("/addQueue", {
+            await fetch("/addQueue", {
                 method: "POST",
                 body: JSON.stringify(bodyObject),
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
+
+            url.value = "";
+            button.disabled = false;
         })
     }
 </script>
