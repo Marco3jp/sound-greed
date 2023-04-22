@@ -18,3 +18,8 @@
     - ここに置くとユーザースコープで扱える
   - `systemctl --user enable --now sound-greed.service`
     - 移動させたあとになんか読み込むコマンド打たないとだめかも
+
+## アップデート
+- `git pull`
+- `go build main.go`
+- `systemctl --user restart sound-greed.service`
