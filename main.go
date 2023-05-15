@@ -106,28 +106,14 @@ func downloadTarget(input addQueueBody) {
 
 	args = append(args, "-o", fileOutputArg)
 	if input.ForceAudioOnly {
-		args = append(args, "-x")
-		args = append(
-			args,
-			"--audio-format",
-			parsedConfig.ConvertAudioFormat,
-		)
-		args = append(
-			args,
-			"--audio-quality",
-			parsedConfig.ConvertAudioQuality,
-		)
+		args = append(args, getAudioOptionParameters())
 	}
 
 	// TODO: 直近はこれで問題なさそうではあるけど暫定対応で、もし他のサイトで音声取ってきたくなったら書き直す必要が出てきてしまう
 	//   代替案として、mp3>mp3/mp4というフォーマットを設定に書くことで、mp3の場合にmp4に詰め直すような処理を回避させることは可能かもしれない
 	//   とはいえ実際に存在しうる音声ファイルのフォーマットを網羅するのは非現実的でもあるので悩ましい
-	if !strings.Contains(input.SoundUrl, "soundcloud.com") {
-		args = append(
-			args,
-			"--recode-video",
-			parsedConfig.ConvertVideoFormat,
-		)
+	if !strings.Contains(input.SoundUrl, "soundcloud.com") && !input.ForceAudioOnly {
+		args = append(args, getVideoOptionParameters())
 	}
 	args = append(args, input.SoundUrl)
 
@@ -147,4 +133,12 @@ func parseConfig() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func getVideoOptionParameters() string {
+	return fmt.Sprintf("--recode-video %s", parsedConfig.ConvertVideoFormat)
+}
+
+func getAudioOptionParameters() string {
+	return fmt.Sprintf("-x --audio-format %s --audio-quality %s", parsedConfig.ConvertAudioFormat, parsedConfig.ConvertAudioQuality)
 }
