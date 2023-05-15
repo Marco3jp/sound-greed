@@ -23,6 +23,8 @@ type configType struct {
 	ConvertAudioFormat  string `json:"convertAudioFormat"`
 	ConvertAudioQuality string `json:"convertAudioQuality"`
 	ConvertVideoFormat  string `json:"convertVideoFormat"`
+	NicoVideoUserName   string `json:"nicoVideoUserName"`
+	NicoVideoPassword   string `json:"nicoVideoPassword"`
 }
 
 type addQueueBody struct {
@@ -115,6 +117,11 @@ func downloadTarget(input addQueueBody) {
 	if !strings.Contains(input.SoundUrl, "soundcloud.com") && !input.ForceAudioOnly {
 		args = append(args, getVideoOptionParameters())
 	}
+
+	if strings.Contains(input.SoundUrl, "nicovideo.jp") {
+		args = append(args, getNicoVideoParameters())
+	}
+
 	args = append(args, input.SoundUrl)
 
 	cmd := exec.Command("yt-dlp", args...)
@@ -141,4 +148,8 @@ func getVideoOptionParameters() string {
 
 func getAudioOptionParameters() string {
 	return fmt.Sprintf("-x --audio-format %s --audio-quality %s", parsedConfig.ConvertAudioFormat, parsedConfig.ConvertAudioQuality)
+}
+
+func getNicoVideoParameters() string {
+	return fmt.Sprintf("--username %s --password %s", parsedConfig.NicoVideoUserName, parsedConfig.NicoVideoPassword)
 }
