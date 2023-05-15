@@ -2,5 +2,7 @@
   "outDir": ".",
   "convertAudioFormat": "mp3",
   "convertAudioQuality": "320K",
-  "convertVideoFormat": "mp4"
+  "convertVideoFormat": "mp4",
+  "nicoVideoUserName": "username",
+  "nicoVideoPassword":"password"
 }
