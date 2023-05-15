@@ -108,18 +108,18 @@ func downloadTarget(input addQueueBody) {
 
 	args = append(args, "-o", fileOutputArg)
 	if input.ForceAudioOnly {
-		args = append(args, getAudioOptionParameters())
+		args = append(args, getAudioOptionParameters()...)
 	}
 
 	// TODO: 直近はこれで問題なさそうではあるけど暫定対応で、もし他のサイトで音声取ってきたくなったら書き直す必要が出てきてしまう
 	//   代替案として、mp3>mp3/mp4というフォーマットを設定に書くことで、mp3の場合にmp4に詰め直すような処理を回避させることは可能かもしれない
 	//   とはいえ実際に存在しうる音声ファイルのフォーマットを網羅するのは非現実的でもあるので悩ましい
 	if !strings.Contains(input.SoundUrl, "soundcloud.com") && !input.ForceAudioOnly {
-		args = append(args, getVideoOptionParameters())
+		args = append(args, getVideoOptionParameters()...)
 	}
 
 	if strings.Contains(input.SoundUrl, "nicovideo.jp") {
-		args = append(args, getNicoVideoParameters())
+		args = append(args, getNicoVideoParameters()...)
 	}
 
 	args = append(args, input.SoundUrl)
@@ -142,14 +142,14 @@ func parseConfig() {
 	}
 }
 
-func getVideoOptionParameters() string {
-	return fmt.Sprintf("--recode-video %s", parsedConfig.ConvertVideoFormat)
+func getVideoOptionParameters() []string {
+	return []string{"--recode-video", parsedConfig.ConvertVideoFormat}
 }
 
-func getAudioOptionParameters() string {
-	return fmt.Sprintf("-x --audio-format %s --audio-quality %s", parsedConfig.ConvertAudioFormat, parsedConfig.ConvertAudioQuality)
+func getAudioOptionParameters() []string {
+	return []string{"-x", "--audio-format", parsedConfig.ConvertAudioFormat, "--audio-quality", parsedConfig.ConvertAudioQuality}
 }
 
-func getNicoVideoParameters() string {
-	return fmt.Sprintf("--username %s --password %s", parsedConfig.NicoVideoUserName, parsedConfig.NicoVideoPassword)
+func getNicoVideoParameters() []string {
+	return []string{"--username", parsedConfig.NicoVideoUserName, "--password", parsedConfig.NicoVideoPassword}
 }
