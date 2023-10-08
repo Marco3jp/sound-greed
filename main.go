@@ -83,11 +83,11 @@ func addQueueHandler(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:      time.Now().Format("2006-01-02 15:04:05"),
 	})
 
+	getQueuesHandler(w, r)
+
 	if !isOperationRunning {
 		go tryQueuePopAndDownload()
 	}
-
-	getQueuesHandler(w, r)
 }
 
 func getQueuesHandler(w http.ResponseWriter, r *http.Request) {
@@ -118,9 +118,8 @@ func tryQueuePopAndDownload() {
 	tryQueuePopAndDownload()
 }
 
-func downloadTarget(input addQueueBody) {
-	today := time.Now()
-	todayString := today.Format("2006-01-02")
+func downloadTarget(input queue) {
+	todayString := time.Now().Format("2006-01-02")
 	outDir := parsedConfig.OutDir + "/" + todayString
 
 	err := os.MkdirAll(outDir, os.ModePerm)
