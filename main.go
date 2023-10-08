@@ -32,6 +32,10 @@ type addQueueBody struct {
 	ForceAudioOnly bool   `json:"forceAudioOnly"`
 }
 
+type getQueuesBody struct {
+	Queues []addQueueBody `json:"queues"`
+}
+
 var operationQueue []addQueueBody
 var isOperationRunning bool = false
 var parsedConfig configType
@@ -40,6 +44,7 @@ func main() {
 	parseConfig()
 	http.HandleFunc("/", htmlHandler)
 	http.HandleFunc("/addQueue", addQueueHandler)
+	http.HandleFunc("/getQueues", getQueuesHandler)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
@@ -72,8 +77,22 @@ func addQueueHandler(w http.ResponseWriter, r *http.Request) {
 		go tryQueuePopAndDownload()
 	}
 
-	// TODO: Queueの状態を返せるといいかも？
-	//  と思ったけどQueueを返すエンドポイントくらいあっていいのでは
+	getQueuesHandler(w, r)
+}
+
+func getQueuesHandler(w http.ResponseWriter, r *http.Request) {
+	var responseBody getQueuesBody
+	responseBody.Queues = operationQueue
+
+	responseBytes, err := json.Marshal(responseBody)
+	if err != nil {
+		fmt.Printf("error json marshal: %v\n", err)
+	}
+
+	_, err = fmt.Fprintf(w, string(responseBytes))
+	if err != nil {
+		fmt.Printf("error fmt Fprintf: %v\n", err)
+	}
 }
 
 func tryQueuePopAndDownload() {

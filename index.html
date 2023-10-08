@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>sound greed</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
 </head>
 <body>
 <h1>sound greed</h1>
@@ -12,9 +18,54 @@
         <label><input type="checkbox" id="audio-only">Audio Only</label>
         <button type="button" id="button">Add Queue</button>
     </form>
+
+    <div>
+        <table>
+            <thead>
+            <tr>
+                <th>URL</th>
+                <th>Audio Only</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template class="queue-table-row">
+                <tr>
+                    <td class="queue-url"></td>
+                    <td class="queue-is-audio-only"></td>
+                </tr>
+            </template>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<script>
+<script type="module">
+    async function fetchQueues() {
+        const json = await fetch("/getQueues").then(response => response.json())
+        if (typeof json.queues === "undefined" || json.queues === null) {
+            return []
+        }
+        return json.queues
+    }
+
+    async function displayQueues(queues) {
+        document.querySelectorAll(".queue").forEach(queue => queue.parentNode.removeChild(queue))
+
+        const tableBody = document.querySelector("tbody")
+        queues.forEach(queue => {
+            const rowContainer = document.querySelector(".queue-table-row").content.cloneNode(true)
+
+            rowContainer.querySelector(".queue-url").textContent = queue.soundUrl
+            rowContainer.querySelector(".queue-is-audio-only").textContent = queue.forceAudioOnly ? "Yes" : "No"
+
+            rowContainer.querySelector("tr").classList.add("queue")
+            tableBody.appendChild(rowContainer)
+        })
+    }
+
+    const queues = await fetchQueues()
+    displayQueues(queues)
+
     const url = document.querySelector("#url")
     const audioOnly = document.querySelector("#audio-only")
     const button = document.querySelector("#button")
@@ -27,16 +78,22 @@
                 forceAudioOnly: audioOnly.checked
             }
 
-            await fetch("/addQueue", {
+            const res = await fetch("/addQueue", {
                 method: "POST",
                 body: JSON.stringify(bodyObject),
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            })
+            }).then(response => response.json())
 
             url.value = "";
             button.disabled = false;
+
+            if (typeof res.queues === "undefined") {
+                return
+            }
+
+            await displayQueues(res.queues)
         })
     }
 </script>
