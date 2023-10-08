@@ -27,16 +27,22 @@ type configType struct {
 	NicoVideoPassword   string `json:"nicoVideoPassword"`
 }
 
+type queue struct {
+	SoundUrl       string `json:"soundUrl"`
+	ForceAudioOnly bool   `json:"forceAudioOnly"`
+	CreatedAt      string `json:"createdAt"`
+}
+
 type addQueueBody struct {
 	SoundUrl       string `json:"soundUrl"`
 	ForceAudioOnly bool   `json:"forceAudioOnly"`
 }
 
 type getQueuesBody struct {
-	Queues []addQueueBody `json:"queues"`
+	Queues []queue `json:"queues"`
 }
 
-var operationQueue []addQueueBody
+var operationQueue []queue
 var isOperationRunning bool = false
 var parsedConfig configType
 
@@ -71,7 +77,11 @@ func addQueueHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("error json unmarshal: %v\n", err)
 	}
 
-	operationQueue = append(operationQueue, requestBody)
+	operationQueue = append(operationQueue, queue{
+		SoundUrl:       requestBody.SoundUrl,
+		ForceAudioOnly: requestBody.ForceAudioOnly,
+		CreatedAt:      time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	if !isOperationRunning {
 		go tryQueuePopAndDownload()

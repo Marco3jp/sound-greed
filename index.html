@@ -25,6 +25,7 @@
             <tr>
                 <th>URL</th>
                 <th>Audio Only</th>
+                <th>Created At</th>
             </tr>
             </thead>
             <tbody>
@@ -32,6 +33,7 @@
                 <tr>
                     <td class="queue-url"></td>
                     <td class="queue-is-audio-only"></td>
+                    <td class="queue-created-at"></td>
                 </tr>
             </template>
             </tbody>
@@ -57,6 +59,7 @@
 
             rowContainer.querySelector(".queue-url").textContent = queue.soundUrl
             rowContainer.querySelector(".queue-is-audio-only").textContent = queue.forceAudioOnly ? "Yes" : "No"
+            rowContainer.querySelector(".queue-created-at").textContent = queue.createdAt
 
             rowContainer.querySelector("tr").classList.add("queue")
             tableBody.appendChild(rowContainer)
