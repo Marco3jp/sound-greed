@@ -23,19 +23,19 @@ type configType struct {
 	ConvertAudioFormat  string `json:"convertAudioFormat"`
 	ConvertAudioQuality string `json:"convertAudioQuality"`
 	ConvertVideoFormat  string `json:"convertVideoFormat"`
-	NicoVideoUserName   string `json:"nicoVideoUserName"`
-	NicoVideoPassword   string `json:"nicoVideoPassword"`
 }
 
 type queue struct {
-	SoundUrl       string `json:"soundUrl"`
-	ForceAudioOnly bool   `json:"forceAudioOnly"`
-	CreatedAt      string `json:"createdAt"`
+	SoundUrl            string `json:"soundUrl"`
+	ForceAudioOnly      bool   `json:"forceAudioOnly"`
+	NiconicoUserSession string `json:"niconicoUserSession"`
+	CreatedAt           string `json:"createdAt"`
 }
 
 type addQueueBody struct {
-	SoundUrl       string `json:"soundUrl"`
-	ForceAudioOnly bool   `json:"forceAudioOnly"`
+	SoundUrl            string `json:"soundUrl"`
+	ForceAudioOnly      bool   `json:"forceAudioOnly"`
+	NiconicoUserSession string `json:"niconicoUserSession"`
 }
 
 type getQueuesBody struct {
@@ -78,9 +78,10 @@ func addQueueHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	operationQueue = append(operationQueue, queue{
-		SoundUrl:       requestBody.SoundUrl,
-		ForceAudioOnly: requestBody.ForceAudioOnly,
-		CreatedAt:      time.Now().Format("2006-01-02 15:04:05"),
+		SoundUrl:            requestBody.SoundUrl,
+		ForceAudioOnly:      requestBody.ForceAudioOnly,
+		NiconicoUserSession: requestBody.NiconicoUserSession,
+		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
 	})
 
 	getQueuesHandler(w, r)
@@ -128,11 +129,18 @@ func downloadTarget(input queue) {
 		return
 	}
 
+	isNiconico := strings.Contains(input.SoundUrl, "nicovideo.jp") || strings.Contains(input.SoundUrl, "nico.ms")
+	if isNiconico && input.NiconicoUserSession == "" {
+		fmt.Printf("error: niconico URL requires user_session cookie\n")
+		return
+	}
+
 	// yt-dlp default template
 	fileNameTemplate := "%(title).50s [%(id)s].%(ext)s"
 	fileOutputArg := outDir + "/" + fileNameTemplate
 
 	var args []string
+	var cookieFile string
 
 	args = append(args, "-o", fileOutputArg)
 	if input.ForceAudioOnly {
@@ -146,8 +154,14 @@ func downloadTarget(input queue) {
 		args = append(args, getVideoOptionParameters()...)
 	}
 
-	if strings.Contains(input.SoundUrl, "nicovideo.jp") {
-		args = append(args, getNicoVideoParameters()...)
+	if isNiconico {
+		cookieFile, err = createNiconicoCookieFile(input.NiconicoUserSession)
+		if err != nil {
+			fmt.Printf("error creating cookie file: %v\n", err)
+			return
+		}
+		defer os.Remove(cookieFile) // ダウンロード後に削除
+		args = append(args, "--cookies", cookieFile)
 	}
 
 	args = append(args, input.SoundUrl)
@@ -178,6 +192,21 @@ func getAudioOptionParameters() []string {
 	return []string{"-x", "--audio-format", parsedConfig.ConvertAudioFormat, "--audio-quality", parsedConfig.ConvertAudioQuality}
 }
 
-func getNicoVideoParameters() []string {
-	return []string{"--username", parsedConfig.NicoVideoUserName, "--password", parsedConfig.NicoVideoPassword}
+func createNiconicoCookieFile(userSession string) (string, error) {
+	tmpFile, err := os.CreateTemp("", "niconico-cookies-*.txt")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer tmpFile.Close()
+
+	// フォーマット: domain flag path secure expiration name value
+	cookieContent := fmt.Sprintf("# Netscape HTTP Cookie File\n.nicovideo.jp\tTRUE\t/\tFALSE\t0\tuser_session\t%s\n", userSession)
+
+	_, err = tmpFile.WriteString(cookieContent)
+	if err != nil {
+		os.Remove(tmpFile.Name())
+		return "", fmt.Errorf("failed to write cookie file: %w", err)
+	}
+
+	return tmpFile.Name(), nil
 }

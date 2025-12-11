@@ -16,6 +16,8 @@
     <form>
         <label>URL: <input type="url" id="url"></label>
         <label><input type="checkbox" id="audio-only">Audio Only</label>
+        <br>
+        <label>niconico user_session (optional): <input type="text" id="niconico-session" placeholder="user_session_..."></label>
         <button type="button" id="button">Add Queue</button>
     </form>
 
@@ -71,14 +73,16 @@
 
     const url = document.querySelector("#url")
     const audioOnly = document.querySelector("#audio-only")
+    const niconicoSession = document.querySelector("#niconico-session")
     const button = document.querySelector("#button")
-    if (url && audioOnly && button) {
+    if (url && audioOnly && niconicoSession && button) {
         button.addEventListener("click", async () => {
             button.disabled = true;
 
             const bodyObject = {
                 soundUrl: url.value,
-                forceAudioOnly: audioOnly.checked
+                forceAudioOnly: audioOnly.checked,
+                niconicoUserSession: niconicoSession.value
             }
 
             const res = await fetch("/addQueue", {
@@ -90,6 +94,7 @@
             }).then(response => response.json())
 
             url.value = "";
+            // niconicoUserSessionはリセットしない（連続して使用するため）
             button.disabled = false;
 
             if (typeof res.queues === "undefined") {
